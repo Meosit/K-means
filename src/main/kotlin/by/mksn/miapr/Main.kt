@@ -3,12 +3,12 @@ import java.io.File
 import java.util.*
 import javax.imageio.ImageIO
 
-const val IMAGE_SIZE = 900
+const val IMAGE_SIZE = 1000
 
 fun main(args: Array<String>) {
     val random = Random()
-    val pointCount = 60000
-    val clusterCount = 9
+    val pointCount = 100000
+    val clusterCount = 15
     val points = Array<Point>(pointCount, {
         index ->
         Point(random.nextInt(IMAGE_SIZE), random.nextInt(IMAGE_SIZE))
@@ -27,5 +27,5 @@ fun main(args: Array<String>) {
         sites = Array<Point>(oldSites.size, { index -> centerOfMass(clusters[index].points) })
     } while (!oldSites.deepEquals(sites) && i < 100)
     val image = drawClustersOnImage(IMAGE_SIZE, colors, clusters)
-    ImageIO.write(image, "png", File("k-means.png"))
+    ImageIO.write(image, "png", File("k-means-${System.currentTimeMillis()}.png"))
 }
