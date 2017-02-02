@@ -1,18 +1,31 @@
-import by.mksn.miapr.Point2D
+import by.mksn.miapr.*
+import java.io.File
 import java.util.*
+import javax.imageio.ImageIO
 
-const val IMAGE_SIZE = 500
+const val IMAGE_SIZE = 900
 
 fun main(args: Array<String>) {
     val random = Random()
-    val pointCount = random.nextInt(99001) + 1000
-    val clusterCount = random.nextInt(19) + 2
-    val points = Array<Point2D>(pointCount, {
+    val pointCount = 60000
+    val clusterCount = 9
+    val points = Array<Point>(pointCount, {
         index ->
-        Point2D(random.nextInt(IMAGE_SIZE), random.nextInt(IMAGE_SIZE))
+        Point(random.nextInt(IMAGE_SIZE), random.nextInt(IMAGE_SIZE))
     })
-    val sites = Array<Point2D>(clusterCount, {
+    var sites = Array<Point>(clusterCount, {
         index ->
-        points[random.nextInt(pointCount)]
+        Point(random.nextInt(IMAGE_SIZE), random.nextInt(IMAGE_SIZE))
     })
+    val colors = Array<Int>(clusterCount, { i -> random.nextInt(16777215) })
+    var clusters: Array<VoronoiCluster>
+    var i = 0
+    do {
+        i++
+        val oldSites = sites
+        clusters = splitForVoronoiClusters(points, oldSites)
+        sites = Array<Point>(oldSites.size, { index -> centerOfMass(clusters[index].points) })
+    } while (!oldSites.deepEquals(sites) && i < 100)
+    val image = drawClustersOnImage(IMAGE_SIZE, colors, clusters)
+    ImageIO.write(image, "png", File("k-means.png"))
 }
