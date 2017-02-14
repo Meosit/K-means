@@ -12,13 +12,7 @@ data class Point(val x: Int, val y: Int) {
 
 data class VoronoiCluster(val site: Point, val points: Array<Point>)
 
-/**
- * Calculates the center of mass for a given point array
- *
- * @param points array of points
- * @return point that is the center of mass
- */
-fun centerOfMass(points: Array<Point>): Point {
+fun centroidOf(points: Array<Point>): Point {
     var centerX: Double = 0.0
     var centerY: Double = 0.0
     for (point in points) {
@@ -31,12 +25,6 @@ fun centerOfMass(points: Array<Point>): Point {
     return Point(centerX.toInt(), centerY.toInt())
 }
 
-/**
- * Splits all points for clusters in base of specified sites
- *
- * @param points array of all points
- * @param sites array sites for clusters
- */
 fun splitForVoronoiClusters(points: Array<Point>, sites: Array<Point>): Array<VoronoiCluster> {
     val clusters = Array<MutableList<Point>>(sites.size, { mutableListOf<Point>() })
     for (point in points) {
@@ -51,4 +39,19 @@ fun splitForVoronoiClusters(points: Array<Point>, sites: Array<Point>): Array<Vo
     return Array(sites.size, { index ->
         VoronoiCluster(sites[index], clusters[index].toTypedArray())
     })
+}
+
+
+fun clusterByKMeans(points: Array<Point>, sites: Array<Point>): Array<VoronoiCluster> {
+    var clusters: Array<VoronoiCluster>
+    @Suppress("NAME_SHADOWING")
+    var sites = sites
+    var i = 0
+    do {
+        i++
+        val oldSites = sites
+        clusters = splitForVoronoiClusters(points, oldSites)
+        sites = Array(oldSites.size, { index -> centroidOf(clusters[index].points) })
+    } while (!oldSites.deepEquals(sites) && i < 100)
+    return clusters
 }

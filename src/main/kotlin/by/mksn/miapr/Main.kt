@@ -1,31 +1,27 @@
-import by.mksn.miapr.*
+package by.mksn.miapr
+
 import java.io.File
 import java.util.*
 import javax.imageio.ImageIO
 
 const val IMAGE_SIZE = 1000
 
+private val RANDOM = Random()
+
+fun randomInt(bound: Int = Int.MAX_VALUE) = RANDOM.nextInt(bound)
+
 fun main(args: Array<String>) {
-    val random = Random()
-    val pointCount = 100000
-    val clusterCount = 15
+    val pointCount = 90000
+    val clusterCount = 9
     val points = Array<Point>(pointCount, {
         index ->
-        Point(random.nextInt(IMAGE_SIZE), random.nextInt(IMAGE_SIZE))
+        Point(randomInt(IMAGE_SIZE), randomInt(IMAGE_SIZE))
     })
-    var sites = Array<Point>(clusterCount, {
+    val sites = Array<Point>(clusterCount, {
         index ->
-        Point(random.nextInt(IMAGE_SIZE), random.nextInt(IMAGE_SIZE))
+        Point(randomInt(IMAGE_SIZE), randomInt(IMAGE_SIZE))
     })
-    val colors = Array<Int>(clusterCount, { i -> random.nextInt(16777215) })
-    var clusters: Array<VoronoiCluster>
-    var i = 0
-    do {
-        i++
-        val oldSites = sites
-        clusters = splitForVoronoiClusters(points, oldSites)
-        sites = Array<Point>(oldSites.size, { index -> centerOfMass(clusters[index].points) })
-    } while (!oldSites.deepEquals(sites) && i < 100)
-    val image = drawClustersOnImage(IMAGE_SIZE, colors, clusters)
+    val clusters = clusterByKMeans(points, sites)
+    val image = drawClustersOnImage(IMAGE_SIZE, clusters)
     ImageIO.write(image, "png", File("k-means-${System.currentTimeMillis()}.png"))
 }
